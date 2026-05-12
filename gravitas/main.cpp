@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include <vector>
 #include <cstdlib>
+#include<time.h>
 using namespace std;
 
 struct Ball {
@@ -9,11 +10,11 @@ struct Ball {
     Color color;
     float rad; // radius
 };
-
+    
 int main() {
     InitWindow(800, 600, "Gravitas");
     SetTargetFPS(60);
-
+    srand(time(NULL));  
     vector<Ball> balls;
 
     for(int i = 0; i < 10; i++) {
