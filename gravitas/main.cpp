@@ -23,7 +23,7 @@ int main() {
     b.vx = (rand() % 7) - 3;// random
     b.vy = 0;
     b.rad = rand()%25;
-    b.color = ColorFromHSV(rand()%360, 1, 1);
+    b.color = ColorFromHSV(i * (360 / 10), 1, 1);
     balls.push_back(b);
 }
 
