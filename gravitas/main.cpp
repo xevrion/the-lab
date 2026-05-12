@@ -84,19 +84,22 @@ int main()
             float r = balls[i].rad;
             if (balls[i].x - r < 0 || balls[i].x + r > 800)
             {
+                
                 if (balls[i].x - r < 0)
                     balls[i].x = r;
                 else
                     balls[i].x = 800 - r;
                 balls[i].vx = -balls[i].vx * 0.8; // restitution 0.8, loses 20% on bounce
+                balls[i].vy *= 0.98f; // friction
             }
             if (balls[i].y - r < 0 || balls[i].y + r > 600)
-            {
+            {   
                 if (balls[i].y - r < 0)
-                    balls[i].y = r;
+                balls[i].y = r;
                 else
-                    balls[i].y = 600 - r;
+                balls[i].y = 600 - r;
                 balls[i].vy = -balls[i].vy * 0.8; // restitution 0.8, loses 20% on bounce
+                balls[i].vx *= 0.98f; // friction
             }
             for (int j = i + 1; j < 10; j++)
             {
