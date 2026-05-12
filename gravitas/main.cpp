@@ -7,6 +7,7 @@ struct Ball {
     float x, y; // pos
     float vx, vy; // velocity
     Color color;
+    float rad; // radius
 };
 
 int main() {
@@ -21,7 +22,8 @@ int main() {
     b.y = rand()%300;
     b.vx = (rand() % 7) - 3;// random
     b.vy = 0;
-    b.color = WHITE;
+    b.rad = rand()%25;
+    b.color = ColorFromHSV(rand()%360, 1, 1);
     balls.push_back(b);
 }
 
@@ -40,7 +42,7 @@ int main() {
             ClearBackground(BLACK);
             // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
             for(int i = 0; i<10; i++){
-                DrawCircle(balls[i].x, balls[i].y, 20, WHITE);
+                DrawCircle(balls[i].x, balls[i].y, balls[i].rad, balls[i].color);
         }
         EndDrawing();
     }
