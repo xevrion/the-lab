@@ -40,7 +40,9 @@ int main() {
             }
         }
         BeginDrawing();
-            ClearBackground(BLACK);
+            // ClearBackground(BLACK);
+            // to get a trailing effect
+            DrawRectangle(0,0 ,800, 600, (Color){0,0,0,25});
             // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
             for(int i = 0; i<10; i++){
                 DrawCircle(balls[i].x, balls[i].y, balls[i].rad, balls[i].color);
