@@ -11,6 +11,7 @@ struct Ball
     float vx, vy; // velocity
     Color color;
     float rad; // radius
+    float restitution; // bounciness
 };
 
 void resolveCollision(Ball &a, Ball &b)
@@ -43,7 +44,11 @@ void resolveCollision(Ball &a, Ball &b)
         return;
 
     // elastic collision impulse with mass weighting
-    float impulse = (2.0f * dot) / totalMass;
+    // float impulse = (2.0f * dot) / totalMass;
+    
+    // inelastic collision impulse with mass weighting and restitution
+    float e = (a.restitution + b.restitution) / 2.0f;
+    float impulse = (1.0f + e) * dot / totalMass;
     a.vx -= impulse * mb * nx;
     a.vy -= impulse * mb * ny;
     b.vx += impulse * ma * nx;
@@ -53,7 +58,7 @@ void resolveCollision(Ball &a, Ball &b)
 int main()
 {
     InitWindow(800, 600, "Gravitas");
-    SetTargetFPS(60);
+    SetTargetFPS(144);
     srand(time(NULL));
     vector<Ball> balls;
 
@@ -66,6 +71,7 @@ int main()
         b.vy = 0;
         b.rad = rand() % 25 + 10;
         b.color = ColorFromHSV(i * (360 / 10), 1, 1);
+        b.restitution =   0.5f + (rand() % 50) / 100.0f;
         balls.push_back(b);
     }
 
@@ -95,6 +101,18 @@ int main()
             for (int j = i + 1; j < 10; j++)
             {
                 resolveCollision(balls[i], balls[j]);
+            }
+            float curr_speed = sqrt(balls[i].vx * balls[i].vx + balls[i].vy * balls[i].vy);
+            if (curr_speed < 0.1f)
+            {
+                balls[i].vx = 0;
+                balls[i].vy = 0;
+            }
+            if(curr_speed > 15.0f) // cap max speed to prevent tunneling
+            {
+                float scale = 15.0f / curr_speed;
+                balls[i].vx *= scale;
+                balls[i].vy *= scale;
             }
         }
         BeginDrawing();
