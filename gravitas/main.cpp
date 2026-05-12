@@ -1,21 +1,47 @@
 #include "raylib.h"
+#include <vector>
+#include <cstdlib>
+using namespace std;
+
+struct Ball {
+    float x, y; // pos
+    float vx, vy; // velocity
+    Color color;
+};
 
 int main() {
     InitWindow(800, 600, "Gravitas");
     SetTargetFPS(60);
 
-    float y = 300, vy = 0, gravity = 0.5;
+    vector<Ball> balls;
 
+    for(int i = 0; i < 10; i++) {
+    Ball b;
+    b.x = rand() % 800; // random
+    b.y = rand()%300;
+    b.vx = (rand() % 7) - 3;// random
+    b.vy = 0;
+    b.color = WHITE;
+    balls.push_back(b);
+}
+
+    
+    
+    
     while (!WindowShouldClose()) {
-        vy += gravity;
-        y += vy;
-        if(y > 580) {
-            y = 580;
-            vy = -vy * 0.8; // restitution number is 0.8, meaning it loses 20% of its velocity on each bounce
+        for(int i = 0; i<10; i++){
+            balls[i].vy += 0.5, balls[i].y += balls[i].vy;
+            if(balls[i].y > 580) {
+                balls[i].y = 580;
+                balls[i].vy = -balls[i].vy * 0.8; // restitution number is 0.8, meaning it loses 20% of its velocity on each bounce
+            }
         }
         BeginDrawing();
             ClearBackground(BLACK);
-            DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
+            // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
+            for(int i = 0; i<10; i++){
+                DrawCircle(balls[i].x, balls[i].y, 20, WHITE);
+        }
         EndDrawing();
     }
 
