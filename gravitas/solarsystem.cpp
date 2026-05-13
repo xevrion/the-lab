@@ -65,14 +65,32 @@ int main()
     srand(time(NULL));
     vector<Ball> balls;
 
-    for (int i = 0; i < 10; i++)
+    Ball sun;
+    sun.x = 400;
+    sun.y = 300;
+    sun.vx = 0;
+    sun.vy = 0;
+    sun.rad = 40;
+    sun.color = YELLOW;
+    balls.push_back(sun);
+
+    for (int i = 0; i < 9; i++)
     {
         Ball b;
-        b.x = rand() % 800; // random
-        b.y = rand() % 300;
-        b.vx = (rand() % 7) - 3; // random
-        b.vy = 0;
-        b.rad = rand() % 25 + 10;
+        b.rad = rand() % 8 + 3; // 3 to 10px instead of 10 to 35
+        float angle = (rand() % 628) / 100.0f; // 0 to 2π
+        float r = 100 + rand() % 200;          // distance from sun: 100 to 300px
+        b.x = sun.x + r * cos(angle);
+        b.y = sun.y + r * sin(angle);
+
+        // tangential velocity for circular orbit: v = sqrt(G * M / r)
+        float dx = b.x - sun.x;
+        float dy = b.y - sun.y;
+        float dist = sqrt(dx * dx + dy * dy);
+        float v = sqrt(G * sun.mass() / dist);
+        // set velocity perpendicular to radius vector for circular orbit
+        b.vx = -v * dy / dist; // perpendicular direction
+        b.vy = v * dx / dist;
         b.color = ColorFromHSV(i * (360 / 10), 1, 1);
         balls.push_back(b);
     }
@@ -111,6 +129,7 @@ int main()
         {
             // apply accumulated force to velocity here
             // then move: x += vx, y += vy
+            if(i == 0) continue; // sun is static for simplicity
             balls[i].vx += balls[i].fx / balls[i].mass();
             balls[i].vy += balls[i].fy / balls[i].mass();
             balls[i].x += balls[i].vx;
@@ -127,9 +146,9 @@ int main()
             }
             // speed cap
             float curr_speed = sqrt(balls[i].vx * balls[i].vx + balls[i].vy * balls[i].vy);
-            if(curr_speed > 15.0f) // cap max speed to prevent tunneling
+            if(curr_speed > 50.0f) // cap max speed to prevent tunneling
             {
-                float scale = 15.0f / curr_speed;
+                float scale = 50.0f / curr_speed;
                 balls[i].vx *= scale;
                 balls[i].vy *= scale;
             }
