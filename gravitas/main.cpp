@@ -12,6 +12,11 @@ struct Ball
     Color color;
     float rad; // radius
     float restitution; // bounciness
+    float mass() const { return rad * rad; } // mass proportional to area
+    
+    // two force accumulators for gravity
+    float fx = 0; // force in x direction
+    float fy = 0; // force in y direction
 };
 
 void resolveCollision(Ball &a, Ball &b)
@@ -77,6 +82,13 @@ int main()
 
     while (!WindowShouldClose())
     {
+        for(int i = 0; i < 10; i++)
+        {
+            balls[i].fx = 0;
+            balls[i].fy = 0;
+        } // we did this to reset the force accumulators before calculating new forces
+
+
         for (int i = 0; i < 10; i++)
         {
             balls[i].vy += 0.5, balls[i].y += balls[i].vy;
@@ -133,3 +145,18 @@ int main()
     CloseWindow();
     return 0;
 }
+
+
+// now research for the gravitational force attraction part thingie:
+// standard order T_T
+// 1. accumulate all forces -> update velocities
+// 2. update positions using new velocities
+// 3. resolve collisions (they correct positions and velocities)
+// 4. draw
+
+// and we'll also face the singularity problem , in which in F = G * m1 * m2 / r^2, if r is very small, F becomes huge and causes instability. To prevent this, we can add a small softening factor to the denominator, like F = G * m1 * m2 / (r^2 + epsilon^2), where epsilon is a small constant. This way, when r is close to zero, the force will not become infinite and will remain manageable.
+// epsillon is the softening length.
+// When balls are far apart: r² is large, ε² is negligible. Formula behaves exactly like real gravity. No difference.
+// When balls are close: r² shrinks toward zero, but ε² is still there. The denominator never reaches zero. Force stays bounded.
+
+
