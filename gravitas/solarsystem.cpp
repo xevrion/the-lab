@@ -24,6 +24,8 @@ struct Ball
     float fy = 0; // force in y direction
 
     bool absorbed = false;
+
+    vector<Vector2> trail; // to store previous positions for trail effect
 };
 
 void mergeBalls(Ball &a, Ball &b)
@@ -159,8 +161,11 @@ int main()
                 continue; // sun is static for simplicity
             balls[i].vx += balls[i].fx / balls[i].mass();
             balls[i].vy += balls[i].fy / balls[i].mass();
+            balls[i].trail.push_back({balls[i].x, balls[i].y}); // add current position to trail
             balls[i].x += balls[i].vx;
             balls[i].y += balls[i].vy;
+            if (balls[i].trail.size() > 1000) // limit trail length
+                balls[i].trail.erase(balls[i].trail.begin());
         }
 
         // 3rd -> collisions and speed cap
@@ -209,9 +214,12 @@ int main()
 
 
         // orbits
-        for(int i = 0; i<balls.size(); i++){
-            if(i==0) continue; // skip sun
-            DrawCircleLines(sun.x, sun.y, sqrt((balls[i].x - sun.x) * (balls[i].x - sun.x) + (balls[i].y - sun.y) * (balls[i].y - sun.y)), (Color){255, 255, 255, 80});
+        for(int i = 1; i < balls.size(); i++) // skip sun for trails
+        {
+            for(int j = 0; j < balls[i].trail.size() - 1; j++)
+            {
+                DrawLineV(balls[i].trail[j], balls[i].trail[j + 1], (Color){balls[i].color.r, balls[i].color.g, balls[i].color.b, (unsigned char)(j * 255 / balls[i].trail.size())});
+            }
         }
 
         // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
