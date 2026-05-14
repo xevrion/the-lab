@@ -207,6 +207,13 @@ int main()
         // to get a trailing effect
         DrawRectangle(0, 0, 800, 600, (Color){0, 0, 0, 25});
 
+
+        // orbits
+        for(int i = 0; i<balls.size(); i++){
+            if(i==0) continue; // skip sun
+            DrawCircleLines(sun.x, sun.y, sqrt((balls[i].x - sun.x) * (balls[i].x - sun.x) + (balls[i].y - sun.y) * (balls[i].y - sun.y)), (Color){255, 255, 255, 80});
+        }
+
         // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
         for (int i = 0; i < balls.size(); i++)
         {
