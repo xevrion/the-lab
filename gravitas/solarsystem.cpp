@@ -1,3 +1,5 @@
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 #include "raylib.h"
 #include <vector>
 #include <cstdlib>
@@ -5,8 +7,9 @@
 #include <math.h>
 using namespace std;
 
-const float G = 0.5f;
-const float EPSILON = 15.0f;
+float G = 0.5f;
+float EPSILON = 15.0f;
+float speedCap = 50.0f;
 
 struct Ball
 {
@@ -77,7 +80,7 @@ int main()
     for (int i = 0; i < 9; i++)
     {
         Ball b;
-        b.rad = rand() % 8 + 3; // 3 to 10px instead of 10 to 35
+        b.rad = rand() % 8 + 3;                // 3 to 10px instead of 10 to 35
         float angle = (rand() % 628) / 100.0f; // 0 to 2π
         float r = 100 + rand() % 200;          // distance from sun: 100 to 300px
         b.x = sun.x + r * cos(angle);
@@ -110,10 +113,11 @@ int main()
             {
                 float dx = balls[j].x - balls[i].x;
                 float dy = balls[j].y - balls[i].y;
-                float dist2 = dx * dx + dy * dy;        // real squared distance
+                float dist2 = dx * dx + dy * dy;          // real squared distance
                 float distSq = dist2 + EPSILON * EPSILON; // softened, for force magnitude only
-                float dist = sqrt(dist2);               // real distance, for normalization only
-                if(dist < 0.001f) continue; // prevent singularity and extreme forces  
+                float dist = sqrt(dist2);                 // real distance, for normalization only
+                if (dist < 0.001f)
+                    continue; // prevent singularity and extreme forces
                 float force = G * balls[i].mass() * balls[j].mass() / distSq;
                 float fx = force * dx / dist;
                 float fy = force * dy / dist;
@@ -129,7 +133,8 @@ int main()
         {
             // apply accumulated force to velocity here
             // then move: x += vx, y += vy
-            if(i == 0) continue; // sun is static for simplicity
+            if (i == 0)
+                continue; // sun is static for simplicity
             balls[i].vx += balls[i].fx / balls[i].mass();
             balls[i].vy += balls[i].fy / balls[i].mass();
             balls[i].x += balls[i].vx;
@@ -146,24 +151,27 @@ int main()
             }
             // speed cap
             float curr_speed = sqrt(balls[i].vx * balls[i].vx + balls[i].vy * balls[i].vy);
-            if(curr_speed > 50.0f) // cap max speed to prevent tunneling
+            if (curr_speed > speedCap) // cap max speed to prevent tunneling
             {
-                float scale = 50.0f / curr_speed;
+                float scale = speedCap / curr_speed;
                 balls[i].vx *= scale;
                 balls[i].vy *= scale;
             }
         }
 
-
         BeginDrawing();
         // ClearBackground(BLACK);
         // to get a trailing effect
         DrawRectangle(0, 0, 800, 600, (Color){0, 0, 0, 25});
+
         // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
         for (int i = 0; i < 10; i++)
         {
             DrawCircle(balls[i].x, balls[i].y, balls[i].rad, balls[i].color);
         }
+        GuiSliderBar((Rectangle){10, 10, 150, 20}, "G", TextFormat("%.2f", G), &G, 0.1f, 2.0f);
+        GuiSliderBar((Rectangle){10, 40, 150, 20}, "Epsilon", TextFormat("%.2f", EPSILON), &EPSILON, 5.0f, 50.0f);
+        GuiSliderBar((Rectangle){10, 70, 150, 20}, "SpeedCap", TextFormat("%.2f", speedCap), &speedCap, 10.0f, 100.0f);
         EndDrawing();
     }
 
