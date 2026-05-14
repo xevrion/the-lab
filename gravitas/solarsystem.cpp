@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include "slider.h"
+#include <algorithm>
 using namespace std;
 
 float G = 0.5f;
@@ -21,7 +22,29 @@ struct Ball
     // two force accumulators for gravity
     float fx = 0; // force in x direction
     float fy = 0; // force in y direction
+
+    bool absorbed = false;
 };
+
+void mergeBalls(Ball &a, Ball &b)
+{
+    float ma = a.mass();
+    float mb = b.mass();
+    if (ma >= mb)
+    {
+        a.rad = sqrt(ma + mb);
+        a.vx = (a.vx * ma + b.vx * mb) / (ma + mb);
+        a.vy = (a.vy * ma + b.vy * mb) / (ma + mb);
+        b.absorbed = true;
+    }
+    else
+    {
+        b.rad = sqrt(ma + mb);
+        b.vx = (a.vx * ma + b.vx * mb) / (ma + mb);
+        b.vy = (a.vy * ma + b.vy * mb) / (ma + mb);
+        a.absorbed = true;
+    }
+}
 
 void resolveCollision(Ball &a, Ball &b)
 {
@@ -81,7 +104,7 @@ int main()
         Ball b;
         b.rad = rand() % 8 + 3;                // 3 to 10px instead of 10 to 35
         float angle = (rand() % 628) / 100.0f; // 0 to 2π
-        float r = 100 + rand() % 200;          // distance from sun: 100 to 300px
+        float r = 150 + rand() % 250; 
         b.x = sun.x + r * cos(angle);
         b.y = sun.y + r * sin(angle);
 
@@ -99,16 +122,16 @@ int main()
 
     while (!WindowShouldClose())
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < balls.size(); i++)
         {
             balls[i].fx = 0;
             balls[i].fy = 0;
         } // we did this to reset the force accumulators before calculating new forces
 
         // 1st loop , accumulate n body forces
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < balls.size(); i++)
         {
-            for (int j = i + 1; j < 10; j++)
+            for (int j = i + 1; j < balls.size(); j++)
             {
                 float dx = balls[j].x - balls[i].x;
                 float dy = balls[j].y - balls[i].y;
@@ -128,7 +151,7 @@ int main()
         }
 
         // 2nd -. apply forces to velocities
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < balls.size(); i++)
         {
             // apply accumulated force to velocity here
             // then move: x += vx, y += vy
@@ -141,10 +164,28 @@ int main()
         }
 
         // 3rd -> collisions and speed cap
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < balls.size(); i++)
         {
+
+            // merging of planet (small one disappear, big one grow)
+                for (int j = i + 1; j < balls.size(); j++)
+                {
+                    float dist = sqrt((balls[i].x - balls[j].x) * (balls[i].x - balls[j].x) + (balls[i].y - balls[j].y) * (balls[i].y - balls[j].y));
+                    if (i == 0) // if the sun is involved, it absorbs the planet instead of merging
+                    {
+                        if (dist < balls[0].rad + balls[j].rad)
+                            balls[j].absorbed = true;
+                        continue;
+                    }
+                    if (dist < balls[i].rad + balls[j].rad)
+                    {
+                        mergeBalls(balls[i], balls[j]);
+                    }
+                }
+
+
             // resolveCollision
-            for (int j = i + 1; j < 10; j++)
+            for (int j = i + 1; j < balls.size(); j++)
             {
                 resolveCollision(balls[i], balls[j]);
             }
@@ -157,14 +198,17 @@ int main()
                 balls[i].vy *= scale;
             }
         }
-
+        balls.erase(
+            remove_if(balls.begin(), balls.end(), [](const Ball& b){ return b.absorbed; }),
+            balls.end()
+        );
         BeginDrawing();
         // ClearBackground(BLACK);
         // to get a trailing effect
         DrawRectangle(0, 0, 800, 600, (Color){0, 0, 0, 25});
 
         // DrawCircle(400, y, 20, WHITE); // the center is at 580 when it hits the ground :)
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < balls.size(); i++)
         {
             DrawCircle(balls[i].x, balls[i].y, balls[i].rad, balls[i].color);
         }
