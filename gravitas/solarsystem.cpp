@@ -1,10 +1,9 @@
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
 #include "raylib.h"
 #include <vector>
 #include <cstdlib>
 #include <time.h>
 #include <math.h>
+#include "slider.h"
 using namespace std;
 
 float G = 0.5f;
@@ -169,9 +168,9 @@ int main()
         {
             DrawCircle(balls[i].x, balls[i].y, balls[i].rad, balls[i].color);
         }
-        GuiSliderBar((Rectangle){10, 10, 150, 20}, "G", TextFormat("%.2f", G), &G, 0.1f, 2.0f);
-        GuiSliderBar((Rectangle){10, 40, 150, 20}, "Epsilon", TextFormat("%.2f", EPSILON), &EPSILON, 5.0f, 50.0f);
-        GuiSliderBar((Rectangle){10, 70, 150, 20}, "SpeedCap", TextFormat("%.2f", speedCap), &speedCap, 10.0f, 100.0f);
+        DrawSlider(50, 550, 200, "Gravity", &G, 0.1f, 5.0f);
+        DrawSlider(300, 550, 200, "Softening", &EPSILON, 1.0f, 30.0f);
+        DrawSlider(550, 550, 200, "Speed Cap", &speedCap, 10.0f, 100.0f);
         EndDrawing();
     }
 
